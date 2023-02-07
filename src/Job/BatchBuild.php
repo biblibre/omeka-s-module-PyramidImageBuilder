@@ -24,7 +24,8 @@ class BatchBuild extends AbstractJob
            ->andWhere('m.mediaType LIKE :mediaType')
            ->setParameter('mediaType', 'image/%');
         $q = $qb->getQuery();
-        $ids = $q->getSingleColumnResult();
+        $results = $q->getScalarResult();
+        $ids = array_column($results, 'id');
 
         foreach ($ids as $id) {
             $media = $em->find(Media::class, $id);
