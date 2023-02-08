@@ -52,5 +52,14 @@ class ConfigForm extends Form
                 'info' => 'Comma-separated list of media types. Only the media types listed here will be considered for building a pyramid image', // @translate
             ],
         ]);
+
+        $this->add([
+            'name' => 'file_size_min',
+            'type' => Text::class,
+            'options' => [
+                'label' => 'Minium file size', // @translate
+                'info' => 'Minimum file size in bytes. Only files bigger than this value will be considered for building a pyramid image', // @translate
+            ],
+        ]);
     }
 }

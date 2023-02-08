@@ -9,6 +9,7 @@ use Omeka\Settings\SettingsInterface;
 use PyramidImageBuilder\BuildStrategy\StrategyInterface;
 use PyramidImageBuilder\Builder\Exception\AlreadyExistsException;
 use PyramidImageBuilder\Builder\Exception\MediaTypeNotAllowedException;
+use PyramidImageBuilder\Builder\Exception\FileSizeTooSmallException;
 
 class Builder
 {
@@ -19,6 +20,7 @@ class Builder
         'image/tiff',
         'image/webp',
     ];
+    const DEFAULT_FILE_SIZE_MIN = 10 * 1024 * 1024; // 10MiB
 
     protected $fileStore;
     protected $buildStrategy;
@@ -74,6 +76,11 @@ class Builder
         $media_types_whitelist = $this->settings->get('pyramidimagebuilder_media_types_whitelist', self::DEFAULT_MEDIA_TYPES_WHITELIST);
         if (!in_array($media->getMediaType(), $media_types_whitelist)) {
             throw new MediaTypeNotAllowedException('Media type is not in whitelist: ' . $media->getMediaType());
+        }
+
+        $file_size_min = intval($this->settings->get('pyramidimagebuilder_file_size_min')) ?: self::DEFAULT_FILE_SIZE_MIN;
+        if ($media->getSize() < $file_size_min) {
+            throw new FileSizeTooSmallException('File size is smaller than the minimum: ' . $media->getSize());
         }
     }
 

@@ -8,6 +8,7 @@ use Omeka\Entity\Media;
 use PyramidImageBuilder\Builder;
 use PyramidImageBuilder\Builder\Exception\AlreadyExistsException;
 use PyramidImageBuilder\Builder\Exception\MediaTypeNotAllowedException;
+use PyramidImageBuilder\Builder\Exception\FileSizeTooSmallException;
 
 class BatchBuild extends AbstractJob
 {
@@ -34,6 +35,7 @@ class BatchBuild extends AbstractJob
 
         $builtCount = 0;
         $alreadyExistsCount = 0;
+        $fileSizeTooSmallCount = 0;
         $errorCount = 0;
         foreach ($ids as $id) {
             $media = $em->find(Media::class, $id);
@@ -50,6 +52,8 @@ class BatchBuild extends AbstractJob
                 ++$builtCount;
             } catch (AlreadyExistsException $e) {
                 ++$alreadyExistsCount;
+            } catch (FileSizeTooSmallException $e) {
+                ++$fileSizeTooSmallCount;
             } catch (Exception $e) {
                 ++$errorCount;
                 $logger->err(sprintf('PyramidImageBuilder: Failed to build media %s: %s', $media->getStorageId(), $e->getMessage()));
@@ -60,6 +64,9 @@ class BatchBuild extends AbstractJob
         $logger->info(sprintf('Pyramid images built: %d', $builtCount));
         if ($alreadyExistsCount) {
             $logger->info(sprintf('Media skipped because a pyramid image already exists: %d', $alreadyExistsCount));
+        }
+        if ($fileSizeTooSmallCount) {
+            $logger->info(sprintf('Media skipped because file size is smaller than the minimum: %d', $fileSizeTooSmallCount));
         }
         $logger->info(sprintf('Errors: %d', $errorCount));
 
