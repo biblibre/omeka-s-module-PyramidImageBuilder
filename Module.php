@@ -36,10 +36,12 @@ class Module extends AbstractModule
         $settings = $this->getServiceLocator()->get('Omeka\Settings');
 
         $form = $formElementManager->get(ConfigForm::class);
+        $media_types_whitelist = $settings->get('pyramidimagebuilder_media_types_whitelist', Builder::DEFAULT_MEDIA_TYPES_WHITELIST);
         $form->setData([
             'build_when_ingested' => $settings->get('pyramidimagebuilder_build_when_ingested'),
             'build_in_background_job' => $settings->get('pyramidimagebuilder_build_in_background_job'),
             'tile_size' => $settings->get('pyramidimagebuilder_tile_size', '256'),
+            'media_types_whitelist' => implode(',', $media_types_whitelist),
         ]);
 
         return $renderer->formCollection($form, false);
@@ -61,6 +63,8 @@ class Module extends AbstractModule
         $settings->set('pyramidimagebuilder_build_when_ingested', $formData['build_when_ingested']);
         $settings->set('pyramidimagebuilder_build_in_background_job', $formData['build_in_background_job']);
         $settings->set('pyramidimagebuilder_tile_size', $formData['tile_size']);
+        $media_types_whitelist = array_map('trim', explode(',', $formData['media_types_whitelist']));
+        $settings->set('pyramidimagebuilder_media_types_whitelist', $media_types_whitelist);
 
         return true;
     }
@@ -74,17 +78,15 @@ class Module extends AbstractModule
     {
         $media = $event->getTarget();
 
-        if (!$media->hasOriginal()) {
-            return;
-        }
-
-        if (0 !== strncmp($media->getMediaType(), 'image/', 6)) {
-            return;
-        }
-
         $services = $this->getServiceLocator();
-        $logger = $services->get('Omeka\Logger');
+        $builder = $services->get('PyramidImageBuilder\Builder');
+
+        if (!$builder->isMediaAcceptable($media)) {
+            return;
+        }
+
         $settings = $services->get('Omeka\Settings');
+        $logger = $services->get('Omeka\Logger');
 
         if ($settings->get('pyramidimagebuilder_build_in_background_job')) {
             $jobDispatcher = $services->get('Omeka\Job\Dispatcher');
@@ -94,8 +96,6 @@ class Module extends AbstractModule
             ];
             $jobDispatcher->dispatch(Build::class, $jobArgs);
         } else {
-            $builder = $services->get('PyramidImageBuilder\Builder');
-
             try {
                 $builder->build($media, ['overwrite' => true]);
             } catch (\Exception $e) {

@@ -7,9 +7,19 @@ use Omeka\Entity\Media;
 use Omeka\File\Store\StoreInterface;
 use Omeka\Settings\SettingsInterface;
 use PyramidImageBuilder\BuildStrategy\StrategyInterface;
+use PyramidImageBuilder\Builder\Exception\AlreadyExistsException;
+use PyramidImageBuilder\Builder\Exception\MediaTypeNotAllowedException;
 
 class Builder
 {
+    const DEFAULT_MEDIA_TYPES_WHITELIST = [
+        'image/jp2',
+        'image/jpeg',
+        'image/png',
+        'image/tiff',
+        'image/webp',
+    ];
+
     protected $fileStore;
     protected $buildStrategy;
     protected $settings;
@@ -23,20 +33,14 @@ class Builder
 
     public function build(Media $media, array $options = [])
     {
+        $this->assertMediaIsAcceptable($media);
+
         $overwrite = $options['overwrite'] ?? false;
         if (!$overwrite) {
             $pyramidLocalPath = $this->getPyramidLocalPath($media);
             if (file_exists($pyramidLocalPath)) {
-                return;
+                throw new AlreadyExistsException("File already exists: $pyramidLocalPath");
             }
-        }
-
-        if (!$media->hasOriginal()) {
-            throw new Exception('Media cannot be builded because it does not have an original file');
-        }
-
-        if (0 !== strncmp($media->getMediaType(), 'image/', 6)) {
-            throw new Exception('Media cannot be builded because of its type: ' . $media->getMediaType());
         }
 
         $source = $this->fileStore->getLocalPath(sprintf('original/%s', $media->getFilename()));
@@ -59,6 +63,30 @@ class Builder
         $this->fileStore->put($tempPyramidFile, $this->getPyramidStoragePath($media));
 
         unlink($tempPyramidFile);
+    }
+
+    public function assertMediaIsAcceptable(Media $media)
+    {
+        if (!$media->hasOriginal()) {
+            throw new Exception('Media cannot be built because it does not have an original file');
+        }
+
+        $media_types_whitelist = $this->settings->get('pyramidimagebuilder_media_types_whitelist', self::DEFAULT_MEDIA_TYPES_WHITELIST);
+        if (!in_array($media->getMediaType(), $media_types_whitelist)) {
+            throw new MediaTypeNotAllowedException('Media type is not in whitelist: ' . $media->getMediaType());
+        }
+    }
+
+    public function isMediaAcceptable(Media $media)
+    {
+        try {
+            $this->assertMediaIsAcceptable($media);
+
+            return true;
+        } catch (Exception $e) {
+        }
+
+        return false;
     }
 
     protected function getPyramidStoragePath(Media $media)

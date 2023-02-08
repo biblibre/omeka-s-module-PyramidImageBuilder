@@ -5,6 +5,7 @@ namespace PyramidImageBuilder\Form;
 use Laminas\Form\Form;
 use Laminas\Form\Element\Checkbox;
 use Laminas\Form\Element\Select;
+use Laminas\Form\Element\Text;
 
 class ConfigForm extends Form
 {
@@ -40,6 +41,15 @@ class ConfigForm extends Form
                     '512' => '512',
                     '1024' => '1024',
                 ],
+            ],
+        ]);
+
+        $this->add([
+            'name' => 'media_types_whitelist',
+            'type' => Text::class,
+            'options' => [
+                'label' => 'Media types whitelist', // @translate
+                'info' => 'Comma-separated list of media types. Only the media types listed here will be considered for building a pyramid image', // @translate
             ],
         ]);
     }
