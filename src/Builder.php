@@ -21,6 +21,10 @@ class Builder
         'image/webp',
     ];
     const DEFAULT_FILE_SIZE_MIN = 10 * 1024 * 1024; // 10MiB
+    const DEFAULT_MEDIA_TYPES_FORCE = [
+        'image/jp2',
+        'image/tiff',
+    ];
 
     protected $fileStore;
     protected $buildStrategy;
@@ -71,6 +75,13 @@ class Builder
     {
         if (!$media->hasOriginal()) {
             throw new Exception('Media cannot be built because it does not have an original file');
+        }
+
+        $mediaType = $media->getMediaType();
+
+        $media_types_force = $this->settings->get('pyramidimagebuilder_media_types_force', self::DEFAULT_MEDIA_TYPES_FORCE);
+        if (in_array($mediaType, $media_types_force)) {
+            return;
         }
 
         $media_types_whitelist = $this->settings->get('pyramidimagebuilder_media_types_whitelist', self::DEFAULT_MEDIA_TYPES_WHITELIST);

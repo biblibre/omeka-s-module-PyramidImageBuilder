@@ -57,8 +57,17 @@ class ConfigForm extends Form
             'name' => 'file_size_min',
             'type' => Text::class,
             'options' => [
-                'label' => 'Minium file size', // @translate
+                'label' => 'Minimum file size', // @translate
                 'info' => 'Minimum file size in bytes. Only files bigger than this value will be considered for building a pyramid image', // @translate
+            ],
+        ]);
+
+        $this->add([
+            'name' => 'media_types_force',
+            'type' => Text::class,
+            'options' => [
+                'label' => 'Media types always built', // @translate
+                'info' => 'Comma-separated list of media types. Media types listed here will always be considered for building a pyramid image, ignoring other rules (like file size)', // @translate
             ],
         ]);
     }

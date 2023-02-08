@@ -37,12 +37,15 @@ class Module extends AbstractModule
 
         $form = $formElementManager->get(ConfigForm::class);
         $media_types_whitelist = $settings->get('pyramidimagebuilder_media_types_whitelist', Builder::DEFAULT_MEDIA_TYPES_WHITELIST);
+        $media_types_force = $settings->get('pyramidimagebuilder_media_types_force', Builder::DEFAULT_MEDIA_TYPES_FORCE);
+
         $form->setData([
             'build_when_ingested' => $settings->get('pyramidimagebuilder_build_when_ingested'),
             'build_in_background_job' => $settings->get('pyramidimagebuilder_build_in_background_job'),
             'tile_size' => $settings->get('pyramidimagebuilder_tile_size', '256'),
             'media_types_whitelist' => implode(',', $media_types_whitelist),
             'file_size_min' => $settings->get('pyramidimagebuilder_file_size_min', Builder::DEFAULT_FILE_SIZE_MIN),
+            'media_types_force' => implode(',', $media_types_force),
         ]);
 
         return $renderer->formCollection($form, false);
@@ -67,6 +70,8 @@ class Module extends AbstractModule
         $media_types_whitelist = array_map('trim', explode(',', $formData['media_types_whitelist']));
         $settings->set('pyramidimagebuilder_media_types_whitelist', $media_types_whitelist);
         $settings->set('pyramidimagebuilder_file_size_min', $formData['file_size_min']);
+        $media_types_force = array_map('trim', explode(',', $formData['media_types_force']));
+        $settings->set('pyramidimagebuilder_media_types_force', $media_types_force);
 
         return true;
     }
