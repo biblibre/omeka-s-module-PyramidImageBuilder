@@ -12,7 +12,8 @@ class BuilderFactory implements FactoryInterface
     {
         $fileStore = $serviceLocator->get('Omeka\File\Store');
         $buildStrategy = $serviceLocator->get('PyramidImageBuilder\BuildStrategy');
+        $settings = $serviceLocator->get('Omeka\Settings');
 
-        return new Builder($fileStore, $buildStrategy);
+        return new Builder($fileStore, $buildStrategy, $settings);
     }
 }

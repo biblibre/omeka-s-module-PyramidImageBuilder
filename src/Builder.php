@@ -5,17 +5,20 @@ namespace PyramidImageBuilder;
 use Exception;
 use Omeka\Entity\Media;
 use Omeka\File\Store\StoreInterface;
+use Omeka\Settings\SettingsInterface;
 use PyramidImageBuilder\BuildStrategy\StrategyInterface;
 
 class Builder
 {
     protected $fileStore;
     protected $buildStrategy;
+    protected $settings;
 
-    public function __construct(StoreInterface $fileStore, StrategyInterface $buildStrategy)
+    public function __construct(StoreInterface $fileStore, StrategyInterface $buildStrategy, SettingsInterface $settings)
     {
         $this->fileStore = $fileStore;
         $this->buildStrategy = $buildStrategy;
+        $this->settings = $settings;
     }
 
     public function build(Media $media, array $options = [])
@@ -46,7 +49,12 @@ class Builder
             throw new Exception('Failed to create temporary file');
         }
 
-        $this->buildStrategy->build($source, $tempPyramidFile);
+        $tile_size = intval($this->settings->get('pyramidimagebuilder_tile_size')) ?: 256;
+        $options = [
+            'tile_size' => $tile_size,
+        ];
+
+        $this->buildStrategy->build($source, $tempPyramidFile, $options);
 
         $this->fileStore->put($tempPyramidFile, $this->getPyramidStoragePath($media));
 

@@ -6,9 +6,16 @@ use PyramidImageBuilder\BuildStrategy\StrategyInterface;
 
 class ImageMagick implements StrategyInterface
 {
-    public function build($source, $destination)
+    public function build($source, $destination, array $options)
     {
-        $command = sprintf('convert %s -define tiff:tile-geometry=128x128 -compress jpeg ptif:%s 2>&1', escapeshellarg($source), escapeshellarg($destination));
+        $tile_size = $options['tile_size'];
+
+        $command = sprintf(
+            'convert %1$s -define tiff:tile-geometry=%3$sx%3$s -compress jpeg ptif:%2$s 2>&1',
+            escapeshellarg($source),
+            escapeshellarg($destination),
+            escapeshellarg($tile_size)
+        );
         $output = [];
         $result_code = 0;
         exec($command, $output, $result_code);

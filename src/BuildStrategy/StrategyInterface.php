@@ -4,5 +4,5 @@ namespace PyramidImageBuilder\BuildStrategy;
 
 interface StrategyInterface
 {
-    public function build($source, $destination);
+    public function build($source, $destination, array $options);
 }

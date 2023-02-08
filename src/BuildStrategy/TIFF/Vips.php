@@ -6,9 +6,17 @@ use PyramidImageBuilder\BuildStrategy\StrategyInterface;
 
 class Vips implements StrategyInterface
 {
-    public function build($source, $destination)
+    public function build($source, $destination, array $options)
     {
-        $command = sprintf('vips tiffsave %s %s --tile --pyramid --compression jpeg 2>&1', escapeshellarg($source), escapeshellarg($destination));
+        $tile_size = $options['tile_size'];
+
+        $command = sprintf(
+            'vips tiffsave %1$s %2$s --tile --pyramid --compression jpeg --tile-width %3$s --tile-height %3$s 2>&1',
+            escapeshellarg($source),
+            escapeshellarg($destination),
+            escapeshellarg($tile_size)
+        );
+
         $output = [];
         $result_code = 0;
         exec($command, $output, $result_code);

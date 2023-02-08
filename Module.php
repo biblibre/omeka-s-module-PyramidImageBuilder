@@ -39,6 +39,7 @@ class Module extends AbstractModule
         $form->setData([
             'build_when_ingested' => $settings->get('pyramidimagebuilder_build_when_ingested'),
             'build_in_background_job' => $settings->get('pyramidimagebuilder_build_in_background_job'),
+            'tile_size' => $settings->get('pyramidimagebuilder_tile_size', '256'),
         ]);
 
         return $renderer->formCollection($form, false);
@@ -59,6 +60,7 @@ class Module extends AbstractModule
         $formData = $form->getData();
         $settings->set('pyramidimagebuilder_build_when_ingested', $formData['build_when_ingested']);
         $settings->set('pyramidimagebuilder_build_in_background_job', $formData['build_in_background_job']);
+        $settings->set('pyramidimagebuilder_tile_size', $formData['tile_size']);
 
         return true;
     }

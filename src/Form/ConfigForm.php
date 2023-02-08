@@ -4,6 +4,7 @@ namespace PyramidImageBuilder\Form;
 
 use Laminas\Form\Form;
 use Laminas\Form\Element\Checkbox;
+use Laminas\Form\Element\Select;
 
 class ConfigForm extends Form
 {
@@ -24,6 +25,21 @@ class ConfigForm extends Form
             'options' => [
                 'label' => 'Build images in a background job', // @translate
                 'info' => 'Building a pyramid image can take a long time, slowing down media creation. Enable this option to build the pyramid image in a background job', // @translate
+            ],
+        ]);
+
+        $this->add([
+            'name' => 'tile_size',
+            'type' => Select::class,
+            'options' => [
+                'label' => 'Tile size', // @translate
+                'info' => 'Size of tiles in pixels', // @translate
+                'value_options' => [
+                    '128' => '128',
+                    '256' => '256',
+                    '512' => '512',
+                    '1024' => '1024',
+                ],
             ],
         ]);
     }

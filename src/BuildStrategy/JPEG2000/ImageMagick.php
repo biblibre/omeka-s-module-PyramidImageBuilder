@@ -6,7 +6,7 @@ use PyramidImageBuilder\BuildStrategy\StrategyInterface;
 
 class ImageMagick implements StrategyInterface
 {
-    public function build($source, $destination)
+    public function build($source, $destination, array $options)
     {
         $command = sprintf('convert %s jp2:%s 2>&1', escapeshellarg($source), escapeshellarg($destination));
         $output = [];
