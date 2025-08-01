@@ -38,6 +38,11 @@ class BatchBuild extends AbstractJob
         $fileSizeTooSmallCount = 0;
         $errorCount = 0;
         foreach ($ids as $id) {
+            if ($this->shouldStop()) {
+                $logger->info('Job stopped');
+                break;
+            }
+
             $media = $em->find(Media::class, $id);
             if (!$media) {
                 continue;
